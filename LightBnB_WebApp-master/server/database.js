@@ -21,7 +21,7 @@ const getUserWithEmail = function(email) {
   return pool
     .query(queryGetUserWithEmail, [email])
     .then((result) => {
-      console.log('___', result.rows);
+      console.log('USER EMAIL', result.rows);
       if(result.rows.length === 0){
         return null;
       } else {
@@ -45,7 +45,7 @@ const getUserWithId = function(id) {
   return pool
     .query(queryGetUserWithId, [id])
     .then((result) => {
-      console.log('___', result.rows);
+      console.log('USER ID', result.rows);
       if(result.rows.length === 0){
         return null;
       } else {
@@ -74,7 +74,7 @@ const addUser =  function(user) {
   return pool
     .query(queryAddUser, [user.name, user.email, user.password])
     .then((result) => {
-      console.log('___', result.rows);
+      //console.log('Reservations', result.rows);
         return result.rows[0];
       }
     )
@@ -83,7 +83,6 @@ const addUser =  function(user) {
     });
 
 }
-
 
 exports.addUser = addUser;
 
@@ -95,7 +94,19 @@ exports.addUser = addUser;
  * @return {Promise<[{}]>} A promise to the reservations.
  */
 const getAllReservations = function(guest_id, limit = 10) {
-  return getAllProperties(null, 2);
+
+  const queryGetAllReservations = `SELECT * FROM reservations WHERE guest_id = $1 LIMIT $2`;
+
+  return pool
+  .query(queryGetAllReservations, [guest_id, limit])
+  .then((result) => {
+      return result.rows[0];
+    }
+  )
+  .catch((err) => {
+    console.log(err.message);
+  });
+
 }
 exports.getAllReservations = getAllReservations;
 
@@ -119,16 +130,64 @@ exports.getAllReservations = getAllReservations;
 const queryGetAllProperties = `SELECT * FROM properties LIMIT $1`;
 
 const getAllProperties = (options, limit = 10) => {
-  return pool
-    .query(queryGetAllProperties, [limit])
-    .then((result) => {
-      console.log(result.rows);
-    })
-    .catch((err) => {
-      console.log(err.message);
-    });
+  
+  // return pool
+  //   .query(queryGetAllProperties, [limit])
+  //   .then((result) => {
+  //     console.log(result.rows);
+  //   })
+  //   .catch((err) => {
+  //     console.log(err.message);
+  //   });
+
+  // 1
+  const queryParams = [];
+  console.log(queryParams);
+  // 2
+  let queryString = `
+  SELECT properties.*, avg(property_reviews.rating) as average_rating
+  FROM properties
+  JOIN property_reviews ON properties.id = property_id
+  `;
+    console.log("STRING",options);
+  // 3
+  
+  if (options.city) {
+    queryParams.push(`%${options.city}%`);
+    queryString += `WHERE city LIKE $${queryParams.length} `;
+  }
+
+  if (options.owner_id) {
+    queryParams.push(`${options.owner_id}`);
+    queryString += `AND owner_id = $${queryParams.length} `;
+  }
+
+  if (options.owner_id) {
+    queryParams.push(`${options.owner_id}`);
+    queryString += `AND owner_id = $${queryParams.length} `;
+  }
+
+
+  console.log("OPTIONs OWNER", options.owner_id);
+  console.log("query string", queryString);
+  // 4
+  queryParams.push(limit);
+  queryString += `
+  GROUP BY properties.id
+  ORDER BY cost_per_night
+  LIMIT $${queryParams.length};
+  `;
+
+  // 5
+  console.log(queryString, queryParams);
+
+  // 6
+  return pool.query(queryString, queryParams).then((res) => res.rows);
+
+
 };
 
+exports.getAllProperties = getAllProperties;
 
 /**
  * Add a property to the database

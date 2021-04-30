@@ -20,6 +20,11 @@ $(() => {
       </div>
 
       <div class="search-property-form__field-wrapper">
+        <label for="owner_id">Owner ID</label>
+        <input type="number" name="owner_id" placeholder="Owner Id" id="owner_id">
+      </div>
+
+      <div class="search-property-form__field-wrapper">
           <button>Search</button>
           <a id="search-property-form__cancel" href="#">Cancel</a>
       </div>
@@ -30,7 +35,7 @@ $(() => {
   $searchPropertyForm.on('submit', function(event) {
     event.preventDefault();
     const data = $(this).serialize();
-
+    console.log("DATA",data);
     getAllListings(data).then(function( json ) {
       propertyListings.addProperties(json.properties);
       views_manager.show('listings');
