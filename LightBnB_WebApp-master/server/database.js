@@ -151,7 +151,7 @@ const getAllProperties = (options, limit = 10) => {
   `;
     console.log("STRING",options);
   // 3
-  
+
   if (options.city) {
     queryParams.push(`%${options.city}%`);
     queryString += `WHERE city LIKE $${queryParams.length} `;
@@ -162,14 +162,33 @@ const getAllProperties = (options, limit = 10) => {
     queryString += `AND owner_id = $${queryParams.length} `;
   }
 
-  if (options.owner_id) {
-    queryParams.push(`${options.owner_id}`);
+  if (options.rating) {
+    queryParams.push(`${options.rating}`);
     queryString += `AND owner_id = $${queryParams.length} `;
   }
+  /*
+  
+  - grab input of user for min and max range
+  - search the database for properties within the range
+  - render the properties 
+  
+  */
+
+  // if (options.cost_per_night) {
+  //   queryParams.push(`${options.cost_per_night}`);
+  //   queryString += `WHERE cost_per_night > $${queryParams.length} `;
+  // } 
+  
+  // if (options.cost_per_night){
+  //   queryParams.push(`${options.cost_per_night}`);
+  //   queryString += `AND cost_per_night < $${queryParams.length} `;
+  // }
+
+  
 
 
-  console.log("OPTIONs OWNER", options.owner_id);
-  console.log("query string", queryString);
+  //console.log("OPTIONs OWNER", options.owner_id);
+  //console.log("query string", queryString);
   // 4
   queryParams.push(limit);
   queryString += `
